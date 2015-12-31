@@ -1,4 +1,7 @@
-# uid [![Build Status](https://travis-ci.org/geotrace/uid.svg)](https://travis-ci.org/geotrace/uid)
+# uid
+
+[![GoDoc](https://godoc.org/github.com/geotrace/uid?status.svg)](https://godoc.org/github.com/geotrace/uid)
+[![Build Status](https://travis-ci.org/geotrace/uid.svg)](https://travis-ci.org/geotrace/uid)
 
 Генератор глобальных уникальных идентификаторов.
 
