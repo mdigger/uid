@@ -6,16 +6,16 @@ import (
 	"time"
 )
 
-// Info описывает разобранную информацию об уникальном идентификаторе.
+// Info describes the parsed information about the unique identifier.
 type Info struct {
-	Time    time.Time // время создания идентификатора
-	Machine []byte    // три байта с идентификатором компьютера
-	Pid     uint16    // идентификатор процесса
-	Counter uint32    // счетчик
+	Time    time.Time // time ID creation
+	Machine []byte    // three bytes with the identifier of the computer
+	Pid     uint16    // the process ID
+	Counter uint32    // counter
 }
 
-// Parse разбирает и возвращает информацию об уникальном идентификаторе. Если
-// строка не является уникальным идентификатором, то возвращается nil.
+// Parse parses and returns information about the unique identifier. If the
+// string is not a unique identifier, it returns nil.
 func Parse(uid string) *Info {
 	if len(uid) != 16 {
 		return nil

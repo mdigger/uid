@@ -1,13 +1,14 @@
-// Генератор глобальных уникальных идентификаторов.
+// Package uid is a generator of globally unique identifiers.
 //
-// Алгоритм генерации глобальных уникальных идентификаторов основан на том же самом принципе, что
-// используется для генерации уникальных идентификаторов в MongoDB. Уникальный идентификатор
-// представляет из себя 12 байтовую последовательность, состоящую из времени генерации,
-// идентификатора компьютера и процесса, а так же счетчика.
+// The algorithm used to generate globally unique identifiers based on the same
+// principle that is used to generate unique IDs in MongoDB. The unique ID is a
+// 12 byte sequence consisting of the time of generation, computer ID, and
+// process, as well as counter.
 //
-// Основное отличие состоит в том, что данный идентификатор сразу представлен в виде строки с
-// использованием base64-encoding. Так же поддерживается функция для быстрого разбора такой строки,
-// которая возвращает информацию о всех значениях, из которых собран данный идентификатор.
+// The main difference is that the identifier is represented as a string using
+// base64-encoding. It also supports a function to quickly parse this string,
+// which returns information about all the values, which are assembled from the
+// identifier.
 package uid
 
 import (
@@ -21,12 +22,12 @@ import (
 	"time"
 )
 
-// objectIDCounter является счетчиком, который автоматически увеличивается после
-// каждой генерации нового уникального ключа. Начальное значение данного ключа
-// устанавливается случайным.
+// objectIDCounter is a counter which is automatically incremented after
+// each generation of a new unique key. The initial value of the given key
+// set random.
 var objectIDCounter = randInt()
 
-// randInt возвращает случайное uint32 число.
+// randInt returns a random uint32 number.
 func randInt() uint32 {
 	b := make([]byte, 3)
 	if _, err := rand.Reader.Read(b); err != nil {
@@ -35,11 +36,10 @@ func randInt() uint32 {
 	return uint32(b[0])<<16 | uint32(b[1])<<8 | uint32(b[2])
 }
 
-// machineId хранит идентификатор машины. Используется при генерации случайного
-// идентификатора.
+// machineId ID stores of the unique machine ID. Used when generating random ID.
 var machineID = readMachineID()
 
-// readMachineId инициализирует значение идентификатора компьютера.
+// readMachineId initialisere the value of the computer ID.
 func readMachineID() []byte {
 	id := make([]byte, 3)
 	if hostname, err := os.Hostname(); err == nil {
@@ -57,12 +57,11 @@ func readMachineID() []byte {
 	return id
 }
 
-// New генерирует строку с глобальным уникальным идентификатором.
+// New generates a string with a globally unique identifier.
 //
-// Для генерации уникального идентификатора используется тот же алгоритм, что и
-// у MongoDB. Отличие состоит только в формате представления сгенерированного
-// идентификатора в строковом виде: для этого данная библиотека использует
-// base64, вместо hex представления.
+// To generate a unique ID using the same algorithm as at MongoDB. The only
+// difference is in the format generated identifier in string form: to do this,
+// the library uses base64 instead of hex representation.
 func New() string {
 	id := make([]byte, 12)
 	// Timestamp, 4 bytes, big endian
