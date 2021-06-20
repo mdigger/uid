@@ -8,17 +8,18 @@ import (
 func TestUID(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		uid := New()
-		info := Parse(uid)
-		if info == nil {
+		info, err := Parse(uid)
+		if err != nil {
 			t.Fatal("bad uid", uid)
 		}
 		fmt.Println(uid, info)
 	}
 
-	if Parse("1234567") != nil {
+	if _, err := Parse("1234567"); err == nil {
 		t.Error("bad parsed")
 	}
-	if result := Parse("V-B8xTRe2V2Zj2m$"); result != nil {
-		t.Error("bad parsed:", result)
+
+	if parsed, err := Parse("V-B8xTRe2V2Zj2m$"); err == nil {
+		t.Error("bad parsed:", parsed)
 	}
 }
