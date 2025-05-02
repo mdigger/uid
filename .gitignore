@@ -1,0 +1,8 @@
+.vscode
+.DS_Store
+.env
+*.zip
+*.log
+~*
+__debug_bin*
+*.pem
