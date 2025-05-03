@@ -24,16 +24,16 @@ func Parse(uid string) (*UID, error) {
 		return nil, err
 	}
 
-	if len(decoded) != 8 {
+	if len(decoded) != 7 {
 		return nil, ErrInvalidLength
 	}
 
-	var bytes [8]byte
+	var bytes [7]byte
 	copy(bytes[:], decoded)
 
 	timestamp := binary.BigEndian.Uint32(bytes[0:4])
 	millis := bytes[4]
-	counter := uint32(bytes[5])<<16 | uint32(bytes[6])<<8 | uint32(bytes[7])
+	counter := uint32(bytes[5])<<8 | uint32(bytes[6])
 
 	return &UID{
 		Timestamp:   time.Unix(int64(timestamp), 0),

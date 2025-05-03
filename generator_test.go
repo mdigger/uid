@@ -1,8 +1,6 @@
 package uid
 
 import (
-	"encoding/base32"
-	"encoding/binary"
 	"strings"
 	"sync"
 	"testing"
@@ -14,8 +12,8 @@ func TestGenerator(t *testing.T) {
 		gen := NewGenerator()
 		uid := gen()
 
-		if len(uid) != 13 {
-			t.Errorf("expected length 13, got %d", len(uid))
+		if len(uid) != 12 {
+			t.Errorf("expected length 12, got %d", len(uid))
 		}
 
 		if !strings.ContainsAny(uid, "0123456789ABCDEFGHIJKLMNOPQRSTUV") {
@@ -28,7 +26,7 @@ func TestGenerator(t *testing.T) {
 		const iterations = 1000
 		uids := make(map[string]bool, iterations)
 
-		for i := 0; i < iterations; i++ {
+		for range iterations {
 			uid := gen()
 			if uids[uid] {
 				t.Fatalf("duplicate UID generated: %s", uid)
@@ -41,26 +39,25 @@ func TestGenerator(t *testing.T) {
 		gen := NewGenerator()
 		uid := gen()
 
-		decoded, err := base32.HexEncoding.WithPadding(base32.NoPadding).DecodeString(uid)
+		parsed, err := Parse(uid)
 		if err != nil {
-			t.Fatalf("failed to decode UID: %v", err)
-		}
-
-		if len(decoded) != 8 {
-			t.Fatalf("expected 8 bytes, got %d", len(decoded))
+			t.Fatalf("failed to parse UID: %v", err)
 		}
 
 		// check that the timestamp approximately corresponds to the current time
-		timestamp := binary.BigEndian.Uint32(decoded[0:4])
-		expected := uint32(time.Now().Unix())
-		if diff := expected - timestamp; diff > 1 {
+		expected := time.Now().Unix()
+		if diff := expected - parsed.Timestamp.Unix(); diff > 1 {
 			t.Errorf("timestamp mismatch, got %d, expected ~%d (diff %d)",
-				timestamp, expected, diff)
+				parsed.Timestamp.Unix(), expected, diff)
 		}
 
-		// check that counter is not null
-		counter := uint32(decoded[5])<<16 | uint32(decoded[6])<<8 | uint32(decoded[7])
-		if counter == 0 {
+		// check that the milliseconds are in the acceptable range
+		if parsed.Millisecond > 255 {
+			t.Errorf("milliseconds out of range: %d", parsed.Millisecond)
+		}
+
+		// check that the counter is not zero
+		if parsed.Counter == 0 {
 			t.Error("counter should not be zero")
 		}
 	})
@@ -92,5 +89,30 @@ func TestGenerator(t *testing.T) {
 			}
 			unique[uid] = true
 		}
+	})
+
+	t.Run("CounterRollover", func(t *testing.T) {
+		gen := NewGenerator()
+
+		// generating the UID before the counter overflows
+		var lastCounter uint32
+		var uid string
+
+		for range 100000 {
+			uid = gen()
+			parsed, err := Parse(uid)
+			if err != nil {
+				t.Fatalf("failed to parse UID: %v", err)
+			}
+
+			// if the counter decreased, it means there was an overflow
+			if parsed.Counter < lastCounter && lastCounter > 60000 {
+				t.Logf("counter rollover detected at %d -> %d", lastCounter, parsed.Counter)
+				return
+			}
+			lastCounter = parsed.Counter
+		}
+
+		t.Error("counter rollover not detected after 100000 iterations")
 	})
 }
